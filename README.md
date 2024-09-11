@@ -40,3 +40,8 @@ pip install -r requirements.txt
 cd demo
 python app.py
 ```
+
+- Giao diện người dùng
+
+  ![image](https://github.com/user-attachments/assets/ef6d9f5a-11c6-4fec-a349-2ef12420c937)
+
