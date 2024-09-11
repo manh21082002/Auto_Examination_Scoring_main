@@ -1,0 +1,9 @@
+imutils
+numpy
+opencv-python
+matplotlib
+Flask
+flask-cors
+saber
+Pillow >= 10.0.0  
+

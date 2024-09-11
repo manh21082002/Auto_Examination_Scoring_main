@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chương trình chấm điểm tự động THPTGQ</title>
+    <style>
+        /* Thiết lập nền với màu gradient đậm và mạnh mẽ */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); /* Sắc thái mạnh với màu tối */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            color: white;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #fc466b, #3f5efb); /* Màu gradient mạnh: đỏ và xanh dương */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        /* Form tải lên */
+        #uploadForm {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+            width: 400px;
+        }
+
+        input[type="file"] {
+            margin-bottom: 10px;
+            font-size: 1rem;
+            color: #ffffff;
+            background-color: #444;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button {
+            font-size: 1rem;
+            padding: 10px 20px;
+            background: linear-gradient(90deg, #fc466b, #3f5efb); /* Nút có màu mạnh mẽ */
+            border: none;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(252, 70, 107, 0.5); /* Hiệu ứng đổ bóng mạnh mẽ khi hover */
+        }
+
+        /* Kết quả hiển thị */
+        #result {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 12px;
+            padding: 15px;
+            max-width: 600px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.2rem;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8);
+        }
+
+        #result h2 {
+            color: #fc466b;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        #result p {
+            color: #ffffff;
+        }
+
+        /* Layout ảnh với phong cách hiện đại và mạnh mẽ */
+        #images {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        img {
+            width: 28%;
+            border: 3px solid #fff;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(63, 94, 251, 0.5); /* Hiệu ứng đổ bóng xanh dương khi hover */
+        }
+
+        /* Thiết kế thân thiện với di động */
+        @media (max-width: 768px) {
+            #images {
+                flex-direction: column;
+            }
+
+            img {
+                width: 80%;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Chấm điểm tự động THPTGQ</h1>
+
+    <!-- Form để tải lên ảnh -->
+    <form id="uploadForm">
+        <input type="file" name="file" id="fileInput" required>
+        <button type="submit">Upload</button>
+    </form>
+
+    <!-- Nơi hiển thị kết quả -->
+    <div id="result"></div>
+
+    <!-- Nơi hiển thị ảnh gốc, ảnh đã xử lý và ảnh chấm điểm -->
+    <div id="images">
+        <img id="originalImage" src="" alt="Original Image" style="display: none;">
+        <img id="processedImage" src="" alt="Processed Image" style="display: none;">
+        <img id="scoreImage" src="" alt="Score Image" style="display: none;">
+    </div>
+
+    <script>
+        // Thêm sự kiện khi form được submit
+        document.getElementById('uploadForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Ngăn form tự động submit
+
+            var formData = new FormData();
+            formData.append('file', document.getElementById('fileInput').files[0]);
+
+            // Gửi yêu cầu POST để upload ảnh
+            fetch('/process_image', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Kiểm tra nếu có lỗi
+                if (data.error) {
+                    document.getElementById('result').innerText = "Error: " + data.error;
+                } else {
+                    // Hiển thị kết quả nếu thành công
+                    const resultDiv = document.getElementById('result');
+                    resultDiv.innerHTML = `
+                        <h2>Kết quả chấm thi</h2>
+                        <p><strong>Mã sinh viên:</strong> ${data.student_id}</p>
+                        <p><strong>Mã đề thi:</strong> ${data.test_id}</p>
+                        <p><strong>Điểm:</strong> ${data.score}</p>
+                    `;
+
+                    // Hiển thị ảnh gốc và ảnh đã xử lý
+                    const originalImage = document.getElementById('originalImage');
+                    const processedImage = document.getElementById('processedImage');
+                    const scoreImage = document.getElementById('scoreImage'); // Ảnh chấm điểm
+
+                    // Cập nhật đường dẫn của ảnh
+                    originalImage.src = `/uploads/${data.original_image}`;
+                    processedImage.src = `/uploads/${data.processed_image}`;
+                    scoreImage.src = `/uploads/${data.score_image}`; // Hiển thị ảnh chấm điểm
+
+                    // Hiển thị hình ảnh
+                    originalImage.style.display = 'block';
+                    processedImage.style.display = 'block';
+                    scoreImage.style.display = 'block'; // Hiển thị ảnh chấm điểm
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').innerText = "An error occurred.";
+            });
+        });
+    </script>
+</body>
+</html>
